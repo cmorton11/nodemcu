@@ -4,7 +4,6 @@ except:
     import socket
 
 response_template = """HTTP/1.0 200 OK
-
 %s
 """
 import machine

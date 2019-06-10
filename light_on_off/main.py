@@ -1,3 +1,8 @@
+import machine
+import ntptime, utime
+from machine import RTC
+from time import sleep
+
 try:
     import usocket as socket
 except:
@@ -15,17 +20,13 @@ response_template = """HTTP/1.0 200 OK
 %s
 """
 
-import machine
-import ntptime, utime
-from machine import RTC
-from time import sleep
+pin = machine.Pin(9, machine.Pin.OUT)
 
+rtc = RTC()
 try:
     seconds = ntptime.time()
 except:
     seconds = 0
-
-rtc = RTC()
 rtc.datetime(utime.localtime(seconds))
 
 def time():
@@ -44,12 +45,25 @@ def dummy():
 
     return response_template % body
 
-pin = machine.Pin(10, machine.Pin.IN)
+def light_on():
+     pin.value(1)
+     body = "You turned a light on!"
+     return response_template % body
+
+def light_off():
+     pin.value(0)
+     body = "You turned a light off!"
+     return response_template % body
 
 handlers = {
     'time': time,
     'dummy': dummy,
+    'light_on': light_on,
+    'light_off':light_off,
 }
+
+
+
 
 def main():
     s = socket.socket()
@@ -63,6 +77,7 @@ def main():
     print("Listening, connect your browser to http://<this_host>:8080")
 
     while True:
+        sleep(1)
         res = s.accept()
         client_s = res[0]
         client_addr = res[1]
